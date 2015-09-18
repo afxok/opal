@@ -52,6 +52,7 @@ public class RangeSlider extends Canvas {
 	private int minimum;
 	private int maximum;
 	private int lowerValue;
+	private int middleValue;
 	private int upperValue;
 	private final List<SelectionListener> listeners;
 	private final Image slider, sliderHover, sliderDrag, sliderSelected;
@@ -99,6 +100,7 @@ public class RangeSlider extends Canvas {
 		super(parent, SWT.DOUBLE_BUFFERED | ((style & SWT.BORDER) == SWT.BORDER ? SWT.BORDER : SWT.NONE));
 		minimum = lowerValue = 0;
 		maximum = upperValue = 100;
+		middleValue = upperValue;
 		listeners = new ArrayList<SelectionListener>();
 		increment = 1;
 		pageIncrement = 10;
@@ -323,8 +325,29 @@ public class RangeSlider extends Canvas {
 		if (lowerValue > upperValue) {
 			lowerValue = upperValue;
 		}
+		if (lowerValue > middleValue) {
+			lowerValue = middleValue;
+		}
 	}
 
+	/**
+	 * Check if the upper value is in ranges
+	 */
+	private void checkMiddleValue() {
+		if (middleValue < minimum) {
+			middleValue = minimum;
+		}
+		if (middleValue > maximum) {
+			middleValue = maximum;
+		}
+		if (middleValue < lowerValue) {
+			middleValue = lowerValue;
+		}
+		if (middleValue > upperValue) {
+			middleValue = upperValue;
+		}
+	}
+	
 	/**
 	 * Check if the upper value is in ranges
 	 */
@@ -337,6 +360,9 @@ public class RangeSlider extends Canvas {
 		}
 		if (upperValue < lowerValue) {
 			upperValue = lowerValue;
+		}
+		if (upperValue < middleValue) {
+			upperValue = middleValue;
 		}
 	}
 
@@ -392,7 +418,8 @@ public class RangeSlider extends Canvas {
 
 		final float pixelSize = computePixelSizeForHorizonalSlider();
 		final int startX = (int) (pixelSize * lowerValue);
-		final int endX = (int) (pixelSize * upperValue);
+		// final int endX = (int) (pixelSize * upperValue);
+		final int endX = (int) (pixelSize * middleValue);
 		if (isEnabled()) {
 			gc.setBackground(getForeground());
 		} else {
@@ -502,7 +529,8 @@ public class RangeSlider extends Canvas {
 
 		final float pixelSize = computePixelSizeForVerticalSlider();
 		final int startY = (int) (pixelSize * lowerValue);
-		final int endY = (int) (pixelSize * upperValue);
+		// final int endY = (int) (pixelSize * upperValue);
+		final int endY = (int) (pixelSize * middleValue);
 		if (isEnabled()) {
 			gc.setBackground(getForeground());
 		} else {
@@ -835,10 +863,29 @@ public class RangeSlider extends Canvas {
 	 */
 	public int[] getSelection() {
 		checkWidget();
-		final int[] selection = new int[2];
+		final int[] selection = new int[3];
 		selection[0] = lowerValue;
-		selection[1] = upperValue;
+		selection[1] = middleValue;
+		selection[2] = upperValue;
 		return selection;
+	}
+
+	/**
+	 * Returns the 'middle selection', which is the upper receiver's position.
+	 *
+	 * @return the selection
+	 *
+	 * @exception SWTException
+	 *                <ul>
+	 *                <li>ERROR_WIDGET_DISPOSED - if the receiver has been
+	 *                disposed</li>
+	 *                <li>ERROR_THREAD_INVALID_ACCESS - if not called from the
+	 *                thread that created the receiver</li>
+	 *                </ul>
+	 */
+	public int getMiddleValue() {
+		checkWidget();
+		return middleValue;
 	}
 
 	/**
@@ -1028,9 +1075,20 @@ public class RangeSlider extends Canvas {
 	 */
 	public void setSelection(final int[] values) {
 		checkWidget();
-		setLowerValue(values[0]);
-		setUpperValue(values[1]);
+		if (values.length == 3)
+		{
+			setLowerValue(values[0]);
+			setMiddleValue(values[1]);
+			setUpperValue(values[2]);
+		}
+		else
+		{
+			setLowerValue(values[0]);
+			setMiddleValue(values[1]);
+			setUpperValue(values[1]);
+		}
 		checkUpperValue();
+		checkMiddleValue();
 		checkLowerValue();
 		redraw();
 	}
@@ -1053,9 +1111,33 @@ public class RangeSlider extends Canvas {
 	public void setSelection(final int lowerValue, final int upperValue) {
 		checkWidget();
 		setLowerValue(lowerValue);
+		setMiddleValue(upperValue);
 		setUpperValue(upperValue);
 	}
 
+	/**
+	 * Sets the 'selection', which is the receiver's value, argument which must
+	 * be greater than or equal to zero.
+	 *
+	 * @param lowerValue the new lower selection (must be zero or greater)
+	 * @param midValue the new middle selection (must be zero or greater)
+	 * @param upperValue the new upper selection (must be zero or greater)
+	 *
+	 * @exception SWTException
+	 *                <ul>
+	 *                <li>ERROR_WIDGET_DISPOSED - if the receiver has been
+	 *                disposed</li>
+	 *                <li>ERROR_THREAD_INVALID_ACCESS - if not called from the
+	 *                thread that created the receiver</li>
+	 *                </ul>
+	 */
+	public void setSelection(final int lowerValue, final int midValue, final int upperValue) {
+		checkWidget();
+		setLowerValue(lowerValue);
+		setMiddleValue(midValue);
+		setUpperValue(upperValue);
+	}
+	
 	/**
 	 * Sets the 'upper selection', which is the upper receiver's value, argument
 	 * which must be greater than or equal to zero.
@@ -1074,6 +1156,34 @@ public class RangeSlider extends Canvas {
 		checkWidget();
 		if (minimum <= value && value <= maximum && value >= lowerValue) {
 			upperValue = value;
+		}
+		redraw();
+	}
+
+	/**
+	 * Sets the 'mid selection', which is the middle receiver's value, argument
+	 * which must be greater than or equal to zero.
+	 *
+	 * @param value the new selection (must be zero or greater)
+	 *
+	 * @exception SWTException
+	 *                <ul>
+	 *                <li>ERROR_WIDGET_DISPOSED - if the receiver has been
+	 *                disposed</li>
+	 *                <li>ERROR_THREAD_INVALID_ACCESS - if not called from the
+	 *                thread that created the receiver</li>
+	 *                </ul>
+	 */
+	public void setMiddleValue(final int value) {
+		checkWidget();
+		if (minimum <= value && value <= maximum && value >= lowerValue && value <= upperValue) {
+			middleValue = value;
+		}
+		else if (minimum <= value && value <= maximum && value <= lowerValue) {
+			middleValue = lowerValue;
+		}
+		else if (minimum <= value && value <= maximum && value >= upperValue) {
+			middleValue = upperValue;
 		}
 		redraw();
 	}
