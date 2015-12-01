@@ -326,7 +326,7 @@ public class RangeSlider extends Canvas {
 			lowerValue = upperValue;
 		}
 		if (lowerValue > middleValue) {
-			lowerValue = middleValue;
+			middleValue = lowerValue;
 		}
 	}
 
@@ -362,7 +362,7 @@ public class RangeSlider extends Canvas {
 			upperValue = lowerValue;
 		}
 		if (upperValue < middleValue) {
-			upperValue = middleValue;
+			middleValue = upperValue;
 		}
 	}
 
@@ -418,7 +418,6 @@ public class RangeSlider extends Canvas {
 
 		final float pixelSize = computePixelSizeForHorizonalSlider();
 		final int startX = (int) (pixelSize * lowerValue);
-		// final int endX = (int) (pixelSize * upperValue);
 		final int endX = (int) (pixelSize * middleValue);
 		if (isEnabled()) {
 			gc.setBackground(getForeground());
@@ -529,7 +528,6 @@ public class RangeSlider extends Canvas {
 
 		final float pixelSize = computePixelSizeForVerticalSlider();
 		final int startY = (int) (pixelSize * lowerValue);
-		// final int endY = (int) (pixelSize * upperValue);
 		final int endY = (int) (pixelSize * middleValue);
 		if (isEnabled()) {
 			gc.setBackground(getForeground());
