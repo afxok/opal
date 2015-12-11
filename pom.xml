@@ -3,15 +3,29 @@
 >
   <modelVersion>4.0.0</modelVersion>
   <groupId>opal</groupId>
-  <artifactId>opal</artifactId>
+  <artifactId>org.mihalis.opal</artifactId>
   <version>1.0.3</version>
   <name>Opal</name>
   <description>A set of SWT widgets</description>
+  <url>https://github.com/lcaron/opal</url>
+  <packaging>eclipse-plugin</packaging>
+  
+    <properties>
+        <tycho.version>0.24.0</tycho.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <mars-repo.url>http://download.eclipse.org/releases/mars</mars-repo.url>
+    </properties>
+    
 <repositories>
     <repository>
       <id>eclipse.org</id>
       <url>http://maven.eclipse.org/nexus/content/repositories/testing/</url>
     </repository>
+            <repository>
+            <id>mars</id>
+            <url>${mars-repo.url}</url>
+            <layout>p2</layout>
+        </repository>
   </repositories>
   <dependencies>
     <dependency>
@@ -31,7 +45,39 @@
           <debug>true</debug>
         </configuration>
       </plugin>
+            <plugin>
+                <groupId>org.eclipse.tycho</groupId>
+                <artifactId>tycho-maven-plugin</artifactId>
+                <version>${tycho.version}</version>
+                <extensions>true</extensions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.eclipse.tycho</groupId>
+                <artifactId>target-platform-configuration</artifactId>
+                <version>${tycho.version}</version>
+                <configuration>
+                    <environments>
+                        <!-- environment> <os>linux</os> <ws>gtk</ws> <arch>x86</arch> </environment> 
+                            <environment> <os>linux</os> <ws>gtk</ws> <arch>x86_64</arch> </environment -->
+                        <environment>
+                            <os>win32</os>
+                            <ws>win32</ws>
+                            <arch>x86</arch>
+                        </environment>
+                        <environment>
+                            <os>win32</os>
+                            <ws>win32</ws>
+                            <arch>x86_64</arch>
+                        </environment>
+                        <environment>
+                            <os>macosx</os>
+                            <ws>cocoa</ws>
+                            <arch>x86_64</arch>
+                        </environment>
+                    </environments>
+                </configuration>
+            </plugin>
     </plugins>
   </build>
-  <url>https://github.com/lcaron/opal</url>
 </project>
